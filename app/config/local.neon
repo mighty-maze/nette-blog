@@ -1,0 +1,12 @@
+parameters:
+
+
+database:
+	dsn: 'mysql:host=127.0.0.1;dbname=quickstart'
+	user: admin
+	password: admin
+
+
+security:
+	users:
+		admin: secret  # user 'admin', password 'secret'
