@@ -4,30 +4,35 @@ declare(strict_types=1);
 
 namespace App\Presenters;
 
+use App\Model\ArticleManager;
+use App\Model\CommentManager;
 use Nette;
 use Nette\Application\UI\Form;
 
 final class PostPresenter extends Nette\Application\UI\Presenter
 {
-    /** @var Nette\Database\Context */
-    private $database;
+    /** @var ArticleManager */
+    private $articleManager;
+    /**
+     * @var CommentManager
+     */
+    private $commentManager;
 
-    public function __construct(Nette\Database\Context $database)
+    public function __construct(ArticleManager $articleManager, CommentManager $commentManager)
     {
-        parent::__construct();
-        $this->database = $database;
+        $this->articleManager = $articleManager;
+        $this->commentManager = $commentManager;
     }
-
 
     public function renderShow(int $postId): void
     {
-        $post = $this->database->table('posts')->get($postId);
+        $post = $this->articleManager->getPublicArticles()->get($postId);
         if (!$post) {
             $this->error('Stránka nebyla nalezena');
         }
 
         $this->template->post = $post;
-        $this->template->comments = $post->related('comment')->order('created_at');
+        $this->template->comments = $this->commentManager->getApprovedCommentsByPost($postId);
     }
 
     protected function createComponentCommentForm(): Form
@@ -58,9 +63,10 @@ final class PostPresenter extends Nette\Application\UI\Presenter
             'name' => $values->name,
             'email' => $values->email,
             'content' => $values->content,
+            'status' => 'new',
         ]);
 
-        $this->flashMessage('Děkuji za komentář', 'success');
+        $this->flashMessage('Děkuji za komentář. Uvidíte ho na stránkách hned po schválení administrátorem.', 'success');
         $this->redirect('this');
     }
 

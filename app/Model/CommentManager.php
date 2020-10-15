@@ -3,12 +3,10 @@
 
 namespace App\Model;
 
-
 use Nette\Database\Context;
-use Nette\Database\Table\Selection;
 use Nette\SmartObject;
 
-class ArticleManager
+class CommentManager
 {
     use SmartObject;
 
@@ -20,10 +18,10 @@ class ArticleManager
         $this->database = $database;
     }
 
-    public function getPublicArticles(): Selection
+    public function getApprovedCommentsByPost(int $postId)
     {
-        return $this->database->table('posts')
-            ->where('created_at < ', new \DateTime)
-            ->order('created_at DESC');
+        return $this->database->table('comments')
+            ->where('status','approved')
+            ->where("post_id", $postId);
     }
 }
